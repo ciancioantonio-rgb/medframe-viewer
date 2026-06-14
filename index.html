@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Lettore locale per l'analisi fotogramma per fotogramma di video AVI IYUV."
+    />
+    <title>MedFrame Viewer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Analisi video locale</p>
+          <h1>MedFrame <span>Viewer</span></h1>
+        </div>
+        <div class="privacy-badge" title="Il video non viene inviato a un server">
+          <span class="privacy-dot"></span>
+          Elaborazione sul dispositivo
+        </div>
+      </header>
+
+      <section id="dropZone" class="drop-zone" aria-label="Carica video">
+        <input id="fileInput" type="file" accept=".avi,video/avi,video/*" hidden />
+        <div class="upload-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+          </svg>
+        </div>
+        <div>
+          <strong>Trascina qui il video AVI</strong>
+          <p>oppure <button id="chooseButton" type="button">scegli un file</button></p>
+        </div>
+        <small>Il file viene letto localmente e non lascia questo dispositivo.</small>
+      </section>
+
+      <section id="viewer" class="viewer is-hidden">
+        <div class="viewer-heading">
+          <div>
+            <p class="eyebrow">File in analisi</p>
+            <h2 id="fileName">Video</h2>
+          </div>
+          <button id="changeFile" class="secondary-button" type="button">Cambia video</button>
+        </div>
+
+        <div class="stage">
+          <canvas id="mainCanvas" aria-label="Fotogramma corrente"></canvas>
+          <div class="frame-overlay">
+            <span id="overlayFrame">FRAME 01 / 15</span>
+            <span id="overlayTime">00:00.000</span>
+          </div>
+        </div>
+
+        <div class="timeline-row">
+          <span id="currentTime">00:00.000</span>
+          <input id="timeline" type="range" min="0" max="14" value="0" step="1" aria-label="Timeline video" />
+          <span id="totalTime">00:00.495</span>
+        </div>
+
+        <div class="controls">
+          <div class="transport-controls">
+            <button id="previousFrame" class="icon-button" type="button" aria-label="Fotogramma precedente">
+              <svg viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6V6z" /></svg>
+            </button>
+            <button id="playPause" class="play-button" type="button" aria-label="Riproduci">
+              <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7V5z" /></svg>
+              <svg id="pauseIcon" class="is-hidden" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM14 5h4v14h-4z" /></svg>
+            </button>
+            <button id="nextFrame" class="icon-button" type="button" aria-label="Fotogramma successivo">
+              <svg viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6V6z" /></svg>
+            </button>
+          </div>
+
+          <fieldset class="speed-control">
+            <legend>Velocità</legend>
+            <label><input type="radio" name="speed" value="0.1" checked /><span>0,1×<small>10× più lento</small></span></label>
+            <label><input type="radio" name="speed" value="0.05" /><span>0,05×<small>20× più lento</small></span></label>
+            <label><input type="radio" name="speed" value="0.033" /><span>0,033×<small>30× più lento</small></span></label>
+          </fieldset>
+        </div>
+
+        <div class="frame-browser">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Sequenza completa</p>
+              <h3>Fotogrammi</h3>
+            </div>
+            <p id="videoMeta"></p>
+          </div>
+          <div id="thumbnails" class="thumbnails" aria-label="Elenco fotogrammi"></div>
+        </div>
+      </section>
+
+      <div id="message" class="message is-hidden" role="alert"></div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
