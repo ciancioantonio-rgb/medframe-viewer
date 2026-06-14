@@ -18,6 +18,11 @@ const elements = {
   pauseIcon: document.querySelector("#pauseIcon"),
   thumbnails: document.querySelector("#thumbnails"),
   videoMeta: document.querySelector("#videoMeta"),
+  downloadVideo: document.querySelector("#downloadVideo"),
+  exportStatus: document.querySelector("#exportStatus"),
+  exportText: document.querySelector("#exportText"),
+  exportPercent: document.querySelector("#exportPercent"),
+  exportProgress: document.querySelector("#exportProgress"),
   message: document.querySelector("#message"),
 };
 
@@ -247,6 +252,92 @@ function showError(error) {
   elements.message.classList.remove("is-hidden");
 }
 
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+function selectRecordingType() {
+  const candidates = [
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
+  return candidates.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+}
+
+function downloadBlob(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+async function exportSlowVideo() {
+  if (!state.video || elements.downloadVideo.disabled) return;
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+    showError("Questo browser non supporta l'esportazione video. Prova con Chrome o Edge aggiornato.");
+    return;
+  }
+
+  stopPlayback();
+  elements.message.classList.add("is-hidden");
+  elements.downloadVideo.disabled = true;
+  elements.exportStatus.classList.remove("is-hidden");
+  elements.exportText.textContent = "Creazione del video rallentato…";
+  elements.exportProgress.value = 0;
+  elements.exportPercent.textContent = "0%";
+
+  const exportCanvas = document.createElement("canvas");
+  const stream = exportCanvas.captureStream(0);
+  const track = stream.getVideoTracks()[0];
+  const mimeType = selectRecordingType();
+  const recorder = new MediaRecorder(stream, {
+    ...(mimeType ? { mimeType } : {}),
+    videoBitsPerSecond: 8_000_000,
+  });
+  const chunks = [];
+  recorder.addEventListener("dataavailable", (event) => {
+    if (event.data.size) chunks.push(event.data);
+  });
+  const stopped = new Promise((resolve, reject) => {
+    recorder.addEventListener("stop", resolve, { once: true });
+    recorder.addEventListener("error", () => reject(recorder.error), { once: true });
+  });
+
+  try {
+    recorder.start();
+    const frameDelay = (state.video.frameDuration / state.speed) * 1000;
+    for (let index = 0; index < state.video.frames.length; index += 1) {
+      renderI420(state.video.frames[index], state.video, exportCanvas);
+      track.requestFrame();
+      const percent = Math.round(((index + 1) / state.video.frames.length) * 100);
+      elements.exportProgress.value = percent;
+      elements.exportPercent.textContent = `${percent}%`;
+      await wait(frameDelay);
+    }
+    recorder.stop();
+    await stopped;
+
+    const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
+    const baseName = elements.fileName.textContent.replace(/\.[^.]+$/, "");
+    const speedLabel = state.speed === 0.033 ? "30x" : `${Math.round(1 / state.speed)}x`;
+    downloadBlob(blob, `${baseName}-rallentato-${speedLabel}.webm`);
+    elements.exportText.textContent = "Video pronto. Download avviato.";
+  } catch (error) {
+    if (recorder.state !== "inactive") recorder.stop();
+    showError(error);
+    elements.exportText.textContent = "Esportazione non riuscita.";
+  } finally {
+    stream.getTracks().forEach((streamTrack) => streamTrack.stop());
+    elements.downloadVideo.disabled = false;
+    window.setTimeout(() => elements.exportStatus.classList.add("is-hidden"), 4000);
+  }
+}
+
 async function loadFile(file) {
   if (!file) return;
   elements.message.classList.add("is-hidden");
@@ -275,6 +366,7 @@ elements.chooseButton.addEventListener("click", () => elements.fileInput.click()
 elements.changeFile.addEventListener("click", () => elements.fileInput.click());
 elements.fileInput.addEventListener("change", (event) => loadFile(event.target.files[0]));
 elements.playPause.addEventListener("click", togglePlayback);
+elements.downloadVideo.addEventListener("click", exportSlowVideo);
 elements.previousFrame.addEventListener("click", () => {
   stopPlayback();
   setCurrentFrame(state.currentFrame - 1);

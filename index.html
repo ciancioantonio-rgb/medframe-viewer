@@ -74,12 +74,27 @@
             </button>
           </div>
 
-          <fieldset class="speed-control">
-            <legend>Velocità</legend>
-            <label><input type="radio" name="speed" value="0.1" checked /><span>0,1×<small>10× più lento</small></span></label>
-            <label><input type="radio" name="speed" value="0.05" /><span>0,05×<small>20× più lento</small></span></label>
-            <label><input type="radio" name="speed" value="0.033" /><span>0,033×<small>30× più lento</small></span></label>
-          </fieldset>
+          <div class="export-group">
+            <fieldset class="speed-control">
+              <legend>Velocità</legend>
+              <label><input type="radio" name="speed" value="0.1" checked /><span>0,1×<small>10× più lento</small></span></label>
+              <label><input type="radio" name="speed" value="0.05" /><span>0,05×<small>20× più lento</small></span></label>
+              <label><input type="radio" name="speed" value="0.033" /><span>0,033×<small>30× più lento</small></span></label>
+            </fieldset>
+            <button id="downloadVideo" class="download-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" />
+              </svg>
+              Scarica video rallentato
+            </button>
+          </div>
+        </div>
+        <div id="exportStatus" class="export-status is-hidden" role="status">
+          <div>
+            <span id="exportText">Preparazione video…</span>
+            <strong id="exportPercent">0%</strong>
+          </div>
+          <progress id="exportProgress" max="100" value="0"></progress>
         </div>
 
         <div class="frame-browser">

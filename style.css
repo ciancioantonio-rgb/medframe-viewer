@@ -174,7 +174,8 @@ h3 {
 
 .upload-icon svg,
 .icon-button svg,
-.play-button svg {
+.play-button svg,
+.download-button svg {
   width: 24px;
   fill: none;
   stroke: currentColor;
@@ -292,6 +293,61 @@ input[type="range"] {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.export-group {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.download-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  color: #06120f;
+  background: var(--accent);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.download-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.download-button svg {
+  width: 19px;
+}
+
+.export-status {
+  margin-top: 10px;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: #bdd0cb;
+  background: rgba(13, 26, 24, 0.88);
+  font-size: 0.75rem;
+}
+
+.export-status div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.export-status progress {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  accent-color: var(--accent-strong);
 }
 
 .speed-control legend {
@@ -433,6 +489,14 @@ input[type="range"] {
   .speed-control {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  .export-group {
+    flex-direction: column;
+  }
+
+  .download-button {
+    min-height: 44px;
   }
 
   .speed-control label span {
